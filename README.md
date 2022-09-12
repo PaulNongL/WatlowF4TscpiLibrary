@@ -13,7 +13,9 @@ This library makes use of the built-in Python Library. It requires importing ate
 Thus, only following are needed: 
  
 -- Python 3
+
 -- Python3-pip
+
 -- pyserial
 
 The pyserial is needed for ModbusRTU communication. 
