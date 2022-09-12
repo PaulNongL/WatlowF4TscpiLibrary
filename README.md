@@ -12,11 +12,9 @@ This library makes use of the built-in Python Library. It requires importing ate
 
 Thus, only following are needed: 
  
--- Python 3
-
--- Python3-pip
-
--- pyserial
+ - Python 3
+ - Python3-pip
+ - Pyserial
 
 The pyserial is needed for ModbusRTU communication. 
 
@@ -32,36 +30,36 @@ Debian 11 basic install readily contains the Python 3 distribution. However, the
 
 Commands should be issued as sudo (or under root shell):
 
--- apt update
--- apt install python3-pip
--- pip3 install --upgrade pip
--- pip3 install pyserial
+- apt update
+- apt install python3-pip
+- pip3 install --upgrade pip
+- pip3 install pyserial
 
 ### CentOS 7 GNU/Linux
 
 CentOS 7 basic install has Python 2.7. Thus, Python 3 must be install manually.
 To accomplish this, CentOS 7 must be modified to link to the CentOS repository and RMPFusion. 
 
--- yum update
--- yum install python3 python3-pip
--- pip3 install --upgrade pip
--- pip3 install pyserial 
+- yum update
+- yum install python3 python3-pip
+- pip3 install --upgrade pip
+- pip3 install pyserial 
 
 ## Testing
 
 This implementation has been tested on various Watlow F4T with different configurations according to their instaleld modules for: 
 
--- Temp with cascade
--- Temp and Humi single staged refrig
--- Temp with single state refrig
--- Temp and Humi with cascade refrig
+- Temp with cascade
+- Temp and Humi single staged refrig
+- Temp with single state refrig
+- Temp and Humi with cascade refrig
 
 Tested on Debian 11 platform via the TCP/IP protocol.
 Tested with Python:
 
--- Python 3.5.7
--- Python 3.7.3
--- Python 3.9.1
+- Python 3.5.7
+- Python 3.7.3
+- Python 3.9.1
 
 Thus, this implementation will work on all Python 3+  
 
