@@ -28,7 +28,7 @@ def ip_addr():
     while True:
         try:
             #ip_addr = input('Enter F4T IP address (e.g., 192.168.0.101): ')
-            ip_addr = '10.30.100.75'
+            ip_addr = '10.30.100.80'
             chk_ip = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip_addr)
             if chk_ip:
                 print ('\n')
@@ -37,28 +37,28 @@ def ip_addr():
             print ('Invalid IP address.')
     return ip_addr
 
-def setTemp():
+def setTemp(str, loop):
     '''set new temp value
     '''
     print ('\n<Applying new Set Point>')
     while True:
         try:
-            tempVal = float(input('Enter new value for Set Point (SP): '))
-            if isinstance(tempVal, int) or isinstance(tempVal,float):
-                tst.write_tempSP(tempVal)
+            val = float(input('Enter new value for Set Point (SP): '))
+            if isinstance(val, int) or isinstance(val,float):
+                tst.write_sp(val, loop)
                 break
         except ValueError:
             print ('Invalid value.\n')
 
     print ('Please wait...\n')
     time.sleep(2)
-    tst.send_cmd(':SOURCE:CLOOP1:SPOINT?')
+    tst.send_cmd(f':SOURCE:CLOOP{loop}:SPOINT?')
     time.sleep(2)
     currentSP = tst.read_items().strip()
-    print(f'Temperature Status: \n   PV: {float(tst.get_tempPV())}'
-              f'\n   SP: {float(currentSP)}')
+    print(f'{str} status: \n   PV: {tst.get_pv(loop)}'
+              f'\n   SP: {currentSP}')
 
-def listTempPV():
+def listTempPV(loop):
     '''list temp process value in 1-second interval
 
        TempPV
@@ -67,7 +67,7 @@ def listTempPV():
         print ('\nList of Temp process values in 1-second interval.'
                '\nPress Ctrl+C to terminate Temp list.\n')
         while True:
-            print(tst.get_tempPV())
+            print(tst.get_pv(loop))
             time.sleep(1)
     except KeyboardInterrupt:
         pass
@@ -109,51 +109,13 @@ def progMode(mode):
     time.sleep(0.5)
     tst.prog_mode(mode)
 
-def setRamp():
-    '''set ramping mode
-
-       defined variables:
-        start, stop, step, ramp_time_min, soak_time_min
-
-        temps = range(start Temp, stop + step, step Temp)
-
-        initial starting point: determined by operator:
-        e.g.:
-            start, stop, step = 25, 38, 5
-            ramp_time_min = 2
-            soak_time_min = 3
-    '''
-    start = input('Enter RAMP start point: ')
-    stop = input ('Enter RAMP end point: ')
-    step = input ('Enter ramp step: ')
-    ramp_time_min = input ('Enter ramp time in minute value: ')
-    soak_time_min = input ('Enter sock time in minute value: ')
-    temps = range(start,stop+step,step)
-    tst.set_ramp('time',ramp_time_min)
-    tst.set_ramScale(RampScale.MINUTES)
-
-    for temp in temps:
-
-        print (f'\nSet new Temp at: {start}')
-        tst.write_tempSP(temp)
-        time.sleep(1)
-
-        print (f'ramp_time_min = {ramp_time_min}')
-        time.sleep(ramp_time_min*5)
-
-        while abs(float(tst.get_tempPV()) - temp) > 0.2:
-            time.sleep(1)
-            # begin soak
-            print(f'beginning soak at temp {tst.get_tempPV()}')
-            time.sleep(soak_time_min*60)
-
 def readTS():
     '''read time signal state
     '''
     try:
         ts_num = int(input('Enter TS number: '))
         if isinstance(ts_num, int):
-            tst.ts_state(ts_num)
+            tst.get_ts(ts_num)
     except ValueError:
         print ('Invalid TS number.')
 
@@ -184,27 +146,30 @@ def selection():  # test
              6. Resume Profile
              7. Read TS output
              8. Set TS output
-             9. Exit
+             9. Set new Humi SP 
+             10. Exit
             ''')
             try: 
-                ans = input('Select option (1-9): ')
+                ans = input('Select option (1-10): ')
                 if ans == '1':
-                    setTemp()
+                    setTemp('Temp',1)
                 elif ans == '2':
-                    listTempPV()
+                    listTempPV(1)
                 elif ans == '3':
                     runProg()
                 elif ans == '4':
-                    progMode(mode='STOP')
+                    progMode('STOP')
                 elif ans == '5':
-                    progMode(mode='PAUSE')
+                    progMode('PAUSE')
                 elif ans == '6':
-                    progMode(mode='RESUME')
+                    progMode('RESUME')
                 elif ans == '7':
                     readTS()
                 elif ans == '8':
                     setTS()
                 elif ans == '9':
+                    setTemp('Humi', 2)
+                elif ans == '10':
                     print ('Program termiated.')
                     ans = None
                 else:
@@ -232,9 +197,10 @@ if __name__ == "__main__":
     print (f"\nTemperature Units currently used: \n   [Units]: {tst.temp_units}")
 
     # Get current temp P and SP values
-    currentPV = tst.get_tempPV()
-    currentSP = tst.get_tempSP() 
-    print (f'\nTemperature Status: \n  PV: {float(currentPV)} \n  SP: {float(currentSP)}')
+    loop = 1
+    currentPV = tst.get_pv(loop)
+    currentSP = tst.get_sp(loop) 
+    print (f'\nTemperature Status: \n  PV: {currentPV} \n  SP: {currentSP}')
 
     # initiate menu
     selection()
