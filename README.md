@@ -2,7 +2,7 @@
 
 A Python 3 built-in library using the Standard Communication Programming Instrumentation (SCPI) was implemented to communicate, control and operate Watlow F4T for this application.
 
-Communication protocol can support TCP/IP, serial RS-232/485 and USB-to-serial communication. The Serial RS-233/RS485 interface requires the communication module installed in slot 6 of F4T.
+Communication protocol can support TCP/IP, serial RS-232/485 and USB-to-serial communication. The Serial RS-233/485 interface requires the communication module installed in slot 6 of F4T.
 
 The sample program included in this implementation makes use of TCP/IP configuration. For serial connect, a section is required in the f4t_class file and f4t_run.py file. 
 
