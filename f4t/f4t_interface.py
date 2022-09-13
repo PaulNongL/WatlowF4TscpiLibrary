@@ -8,7 +8,6 @@ Upper level interface for Watlow F4T controller; control implementation
 for communication via SCPI register, unregister using built-in Python Library.
 '''
 import time
-import socket
 import logging
 from f4t_class import Controller, TempUnits, RampScale
 
@@ -24,7 +23,22 @@ class F4T(Controller):
         if self.timeout is None:
             self.timeout = 1.5
         self.profiles = {}
-    
+
+    def get_units(self):
+        '''probe controller for current set units
+        '''
+        self.clear_buffer()
+        self.send_cmd(':UNIT:TEMPERATURE?')
+        rsp = self.read_items()
+        self.temp_units = TempUnits(rsp)        
+
+    def set_units(self, units:TempUnits = None):
+        '''apply new units to controller
+        '''
+        if units is None:
+            units = self.temp_units
+        self.send_cmd(f':UNITS:TEMPERATURE {units.value}')
+
     def get_profiles(self):
         '''set max limit for profile list
         '''
@@ -38,21 +52,6 @@ class F4T(Controller):
                 self.profiles[i] = name
             else:
                 break
-
-    def get_units(self):
-        '''probe controller for current set units
-        '''
-        self.clear_buffer()
-        self.send_cmd(':UNIT:TEMPERATURE?')
-        resp = self.read_items()
-        self.temp_units = TempUnits(resp)        
-
-    def set_units(self, units:TempUnits = None):
-        '''apply new units to controller
-        '''
-        if units is None:
-            units = self.temp_units
-        self.send_cmd(f':UNITS:TEMPERATURE {units.value}')
 
     def select_profile(self, profile: int):
         '''
@@ -72,20 +71,28 @@ class F4T(Controller):
            - state: pause
              pause current line of currently running program
            - state: resume
-             resume the state of current program.
+             resume the state of currently paused program.
         '''
         self.send_cmd(f':PROGRAM:SELECTED:STATE {mode}')
 
-    def get_tempPV(self, cloop = 1):
-        '''read temperature Process Value from controller
+    def get_pv(self, loop):
+        '''read temperature and humidity process values from controller
+           based on loop selection
+
+           TempPV: loop = 1
+           HumiPV: loop = 2
         '''
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:PVALUE?')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:PVALUE?')
         return self.read_items()
 
-    def get_tempSP(self, cloop = 1):
-        '''read temperature Set Point value from controller
+    def get_sp(self, loop):
+        '''read temperature and humidity set point values from controller
+           based on loop selection
+
+           TempSP: loop = 1
+           HumiSP: loop = 2
         '''
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:SPOINT?')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:SPOINT?')
         return self.read_items()
 
     def get_cascadeSP(self, cascade = 1):
@@ -114,10 +121,14 @@ class F4T(Controller):
         self.send_cmd(f':SOURCE:CASCADE{cascade}:{sloop}:SPOINT?')
         return self.read_items()
 
-    def write_tempSP(self, temp, cloop = 1):
-        '''write temperature set point to controller
+    def write_sp(self, val, loop):
+        '''write temperature or humidity set point controller
+           based on loop selection
+
+           TempSP: loop 1
+           HumiSP: loop 2 
         '''
-        self.send_cmd(f'SOURCE:CLOOP{cloop}:SPOINT {temp}')
+        self.send_cmd(f'SOURCE:CLOOP{loop}:SPOINT {val}')
 
     def is_done(self, ts_num):
         '''send terminating signal
@@ -129,7 +140,7 @@ class F4T(Controller):
         status = True if rsp == 'ON' else False
         return status
 
-    def ts_state(self, ts_num):
+    def get_ts(self, ts_num):
         '''read the state of time signal output
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
@@ -149,13 +160,13 @@ class F4T(Controller):
         time.sleep(0.2)
         self.send_cmd(f':OUTPUT{ts_num}:STATE {state}')
 
-    def set_ramScale(self, ramp_scale, cloop = 1):
+    def set_ramScale(self, ramp_scale, loop = 1):
         '''define ramp scale for loop 1
         '''
         scale = RampScale(ramp_scale)
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:RSCALE {scale}')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {scale}')
 
-    def ramp_mode(self, mode, cloop):
+    def ramp_mode(self, mode, loop):
         '''set ramp mode: 
            define option for each mode:
               mode: OFF (turn off ramping)
@@ -163,22 +174,22 @@ class F4T(Controller):
               mode: SETPOINT (apply setpoint change)
               mode: BOTH (apply both values silmultaneously)
         '''
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:RACTION {mode}')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:RACTION {mode}')
 
-    def get_ramp(self, rampType, cloop = 1):
+    def get_ramp(self, rampType, loop = 1):
         '''get ramp mode in rate or time
            
            rate: RRATE
            time: RTIME
         '''
         rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:{rateMode}')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode}')
 
-    def set_ramp(self, rampType, value, cloop = 1):
+    def set_ramp(self, rampType, value, loop = 1):
         '''apply ramp setting in rate or time
 
            rate: RRATE
            time: RTIME 
         '''
         rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
-        self.send_cmd(f':SOURCE:CLOOP{cloop}:{rateMode} {value}')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode} {value}')
