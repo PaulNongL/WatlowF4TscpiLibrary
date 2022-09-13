@@ -58,7 +58,7 @@ Tested on Debian 11 platform via the TCP/IP protocol.
 Tested with Python:
 
 - Python 3.5.7
-- Python 3.7.3
+- Python 3.6.8
 - Python 3.9.1
 
 Thus, this implementation will work on all Python 3+  
