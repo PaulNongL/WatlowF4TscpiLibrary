@@ -20,7 +20,7 @@ The pyserial is needed for ModbusRTU communication.
 
 ## Installation
 
-This implementation was originally written for GNU/Linux, but it can support Mac OS and MS Windows platform, provided the necessary requirements and packaged are met.
+This implementation was originally written for GNU/Linux, but it can support Mac OS and MS Windows platform, provided the necessary requirements and packages are met.
 
 The following provides guidance for preparing Debian 11 GNU/Linux and CentOS 7 platforms to use this implementation.
 
