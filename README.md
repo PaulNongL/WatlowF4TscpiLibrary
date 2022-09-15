@@ -44,7 +44,7 @@ To accomplish this, CentOS 7 must be modified to link to the CentOS repository a
 
 ## Testing
 
-This implementation has been tested on various Watlow F4T with different configurations according to their instaleld modules for: 
+This implementation has been tested on various Watlow F4T with different configurations according to their installed modules for: 
 
 - Temp with cascade
 - Temp and Humi single staged refrig
