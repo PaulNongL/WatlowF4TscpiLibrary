@@ -8,18 +8,13 @@ The sample program included in this implementation makes use of TCP/IP configura
 
 ## Requirements
 
-### Python modules
 This library makes use of the built-in Python Library. It requires importing atexit and register/unregister. 
 
 Thus, only following are needed: 
  
  - Python 3
  - Python3-pip
- - Pyserial
 
-The pyserial is needed for ModbusRTU communication. 
-
-### F4T Firmware
 The SCPI protocol for Watlow F4T is application with new firmware (tested on 04:07:0012). It also only applies in TCP/IP protocol application. IT does not support serial itnerface.  
 
 ## Installation
