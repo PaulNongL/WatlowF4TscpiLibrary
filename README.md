@@ -32,7 +32,6 @@ Commands should be issued as sudo (or under root shell):
 - apt update
 - apt install python3-pip
 - pip3 install --upgrade pip
-- pip3 install pyserial
 
 ### CentOS 7 GNU/Linux
 
@@ -42,7 +41,6 @@ To accomplish this, CentOS 7 must be modified to link to the CentOS repository a
 - yum update
 - yum install python3 python3-pip
 - pip3 install --upgrade pip
-- pip3 install pyserial 
 
 ## Testing
 
