@@ -129,54 +129,75 @@ def setTS():
     except ValueError:
         print ('Invalid TS number.')
 
+def instantChange(mode, loop):
+    '''Start the instant temperature change to set point
+    '''
+    print ('Starting Instant Change on temperature...')
+    time.sleep(0.5)
+    tst.ramp_mode(mode,loop)
+
 def selection():  # test 
     '''set up selection menu for operation
     '''
-    try:
-        ans=True
-        while ans:
-            print ('\nControl options:') 
-            print ('''
-             1. Set new Temp SP
-             2. List Temp PV
-             3. Execute Profile
-             4. Stop Profile
-             5. Pause Profile
-             6. Resume Profile
-             7. Read TS output
-             8. Set TS output
-             9. Set new Humi SP 
-             10. Exit
-            ''')
-            try: 
-                ans = input('Select option (1-10): ')
-                if ans == '1':
-                    setTemp('Temp',1)
-                elif ans == '2':
-                    listTempPV(1)
-                elif ans == '3':
-                    runProg()
-                elif ans == '4':
-                    progMode('STOP')
-                elif ans == '5':
-                    progMode('PAUSE')
-                elif ans == '6':
-                    progMode('RESUME')
-                elif ans == '7':
-                    readTS()
-                elif ans == '8':
-                    setTS()
-                elif ans == '9':
-                    setTemp('Humi', 2)
-                elif ans == '10':
-                    print ('Program termiated.')
-                    ans = None
-                else:
-                    print('\nInvalid input. Try again...')
-            except ValueError:
-                pass  
-    except KeyboardInterrupt:
-        pass 
+    while(True):
+        print_menu()
+        option = ''
+        try:
+            option = input('Select option (a-z): ')
+        except:
+            print('Invalid input; expected a letter [a-z].')
+        #Check what choice was entered and act accordingly
+        if option == 'a':
+            setTemp('Temp',1)
+        elif option == 'b':
+            setTemp('Humi',2)
+        elif option == 'c':
+            runProg()
+        elif option == 'd':
+            progMode('PAUSE')
+        elif option == 'e':
+            progMode('RESUME')
+        elif option == 'f':
+            progMode('STOP')
+        elif option == 'g':
+            listTempPV(1)
+        elif option == 'h':
+            readTS()
+        elif option == 'i':
+            setTS()
+        elif option == 'j':
+            instantChange('OFF',1)
+        elif option == 'z':
+            print('Program terminated.')
+            exit()
+        else:
+            print('Invalid option; expected a letter [a-z].')
+
+def menu():
+    '''menu'''
+    menu_options = {
+        'a': 'Set new Temp SP ',
+        'b': 'Set new Humi SP ',
+        'c': 'Execute Program ',
+        'd': 'Pause Program   ',
+        'e': 'Resume Program  ',
+        'f': 'Stop Program    ',
+        'g': 'List Temp PV    ',
+        'h': 'Read TS output  ',
+        'i': 'Set TS output   ',
+        'j': 'Start Temp to SP', 
+        'z': 'Exit            ',
+    }
+    return menu_options
+
+def print_menu():
+    '''set up selection menu
+    '''
+    print ('\nControl options:'
+           '\n--------------------------') 
+    for key in menu().keys():
+        print (f'  [{key}]:', menu()[key] )
+    print ('--------------------------') 
 
 if __name__ == "__main__":
 
