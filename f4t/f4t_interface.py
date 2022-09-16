@@ -169,7 +169,7 @@ class F4T(Controller):
     def ramp_mode(self, mode, loop):
         '''set ramp mode: 
            define option for each mode:
-              mode: OFF (turn off ramping)
+              mode: OFF (turn off ramping); set instant change to SP.
               mode: STARTUP (set startup)
               mode: SETPOINT (apply setpoint change)
               mode: BOTH (apply both values silmultaneously)
