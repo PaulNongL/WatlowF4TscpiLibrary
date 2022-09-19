@@ -57,6 +57,19 @@ def setTemp(str, loop):
     print(f'{str} status: \n   PV: {tst.get_pv(loop)}'
               f'\n   SP: {currentSP}')
 
+def listProg():
+    '''Read programs in F4T storage and list them...
+    '''
+    # Get profiles from controller and units
+    print ('\nReading profiles from F4T. Profile gap in the list is ignored.')
+    print ("Profile list may be inaccurate if list is acquired while a profile is being executed.")
+    print ("Please wait...")
+    tst.get_profiles()
+    tst.get_units()
+    print (f"\nF4T profiles found in sequence (slot number: 'name'): \n{tst.profiles}")
+    print (f"\nTemperature Units currently used: \n   [Units]: {tst.temp_units}")
+    pass 
+
 def listTempPV(loop):
     '''list temp process value in 1-second interval
 
@@ -134,69 +147,170 @@ def instantChange(mode, loop):
     '''
     print ('Starting Instant Change on temperature...')
     time.sleep(0.5)
+    tst.ramp_mode('STARTUP',1)
+    time.sleep(1)
     tst.ramp_mode(mode,loop)
 
-def selection():  # test 
-    '''set up selection menu for operation
+def thCtrl():
+    '''
+       set options for Temp and Humi controls
     '''
     while(True):
-        print_menu()
+        print_menu('2')
         option = ''
         try:
             option = input('Select option (a-z): ')
         except:
             print('Invalid input; expected a letter [a-z].')
-        #Check what choice was entered and act accordingly
-        if option == 'a':
+        if option == 't':
             setTemp('Temp',1)
-        elif option == 'b':
-            setTemp('Humi',2)
-        elif option == 'c':
-            runProg()
-        elif option == 'd':
-            progMode('PAUSE')
-        elif option == 'e':
-            progMode('RESUME')
-        elif option == 'f':
-            progMode('STOP')
-        elif option == 'g':
-            listTempPV(1)
         elif option == 'h':
-            readTS()
-        elif option == 'i':
-            setTS()
-        elif option == 'j':
+            setTemp('Humi',2)
+        elif option == 's':
             instantChange('OFF',1)
+        elif option == 'z':
+            print('Returning to Main Menu.')
+            time.sleep(.5)
+            os.system('clear||cls')
+            selection()
+        else:
+            print('Invalid option; expected a letter [a-z].')
+
+def selection(): 
+    '''
+       Set options for program control
+    '''
+    while(True):
+        print_menu('1')
+        option = ''
+        try:
+            option = input('Select option (a-z): ')
+        except:
+            print('Invalid input; expected a letter [a-z].')
+        if option == 't':
+            thCtrl()
+        elif option == 'p':
+            progMenu()
+        elif option == 'e':
+            eventCtrl()
         elif option == 'z':
             print('Program terminated.')
             exit()
         else:
             print('Invalid option; expected a letter [a-z].')
 
-def menu():
-    '''menu'''
-    menu_options = {
-        'a': 'Set new Temp SP ',
-        'b': 'Set new Humi SP ',
-        'c': 'Execute Program ',
-        'd': 'Pause Program   ',
-        'e': 'Resume Program  ',
-        'f': 'Stop Program    ',
-        'g': 'List Temp PV    ',
-        'h': 'Read TS output  ',
-        'i': 'Set TS output   ',
-        'j': 'Start Temp to SP', 
-        'z': 'Exit            ',
-    }
-    return menu_options
+def eventCtrl():
+    '''Test TS events
+    '''
+    while(True):
+        print_menu('4')
+        option = ''
+        try:
+            option = input('Select option (a-z): ')
+        except:
+            print('Invalid input; expected a letter [a-z].')
+        if option == 'r':
+            readTS()
+        elif option == 's':
+            setTS()
+        elif option == 'z':
+            print('Return to Main Menu...')
+            time.sleep(0.5)
+            os.system('clear||cls')
+            selection() 
+        else:
+            print('Invalid option; expected a letter [a-z].')
 
-def print_menu():
+
+def progMenu():  # test 
+    '''set up selection menu for operation
+       main menu 
+
+       l: list programs
+       e: execute program
+       p: pause program
+       r: resume program
+       s: stop program
+       z: return to Main Menu 
+    '''
+    while(True):
+        print_menu('3')
+        option = ''
+        try:
+            option = input('Select option (a-z): ')
+        except:
+            print('Invalid input; expected a letter [a-z].')
+        if option == 'l':
+            listProg()
+        elif option == 'e':
+            runProg()
+        elif option == 'p':
+            progMode('PAUSE')
+        elif option == 'r':
+            progMode('RESUME')
+        elif option == 's':
+            progMode('STOP')
+        elif option == 'z':
+            print('Return to Main.')
+            time.sleep(0.5)
+            os.system('clear||cls')
+            selection()
+        else:
+            print('Invalid option; expected a letter [a-z].')
+
+def menu(choice):
+    '''menu
+    '''
+    # option 1
+    main_menu = {
+        't': 'Temp/Humi SP control       ',
+        'p': 'Program control            ',
+        'e': 'Event control              ',
+        'z': 'Exit                       '
+    }
+
+    # option 2
+    th_menu = {
+        't': 'New Temperature Set Point  ',
+        'h': 'New Humidity Set Point     ',
+        's': 'Start instant change to SP ',
+        'z': 'Return to Main Menu        '
+    }
+
+    # option 3
+    prog_menu = {
+        'l': 'List program               ',
+        'e': 'Execute program            ',
+        'p': 'Pause program              ',
+        'r': 'Resume program             ',
+        's': 'Stop program               ',
+        'z': 'Return to Main Menu        '
+    }
+
+    # option 4
+    ts_menu = {
+        'r': 'Read event (TS) output     ',
+        's': 'Set event (TS) output      ', 
+        'z': 'Return to Main Menu        '
+    }
+
+
+    if choice == '1':
+        return main_menu
+    elif choice == '2':
+        return th_menu
+    elif choice == '3':
+        return prog_menu 
+    elif choice == '4':
+        return ts_menu 
+
+def print_menu(choice):
     '''set up selection menu
     '''
-    print ('\nControl options:'
+    print ('\nF4T control options:'
            '\n--------------------------') 
-    for key in menu().keys():
-        print (f'  [{key}]:', menu()[key] )
+    for key in menu(choice).keys():
+        print (f'  [{key}]:', menu(choice)[key] )
     print ('--------------------------') 
 
 if __name__ == "__main__":
@@ -206,15 +320,6 @@ if __name__ == "__main__":
 
     # connecto to watlow F4T via proper IP address using TCP/IP protocol
     tst = F4T(host = ip_addr(), timeout = 1)
-
-    # Get profiles from controller and units
-    print ('\nReading profiles from F4T. Profile gap in the list is ignored.')
-    print ("Profile list may be inaccurate if list is acquired while a profile is being executed.")
-    print ("Please wait...")
-    tst.get_profiles()
-    tst.get_units()
-    print (f"\nF4T profiles found in sequence (slot number: 'name'): \n{tst.profiles}")
-    print (f"\nTemperature Units currently used: \n   [Units]: {tst.temp_units}")
 
     # Get current temp P and SP values
     loop = 1
