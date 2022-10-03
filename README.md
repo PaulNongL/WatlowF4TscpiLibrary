@@ -49,7 +49,7 @@ This implementation has been tested on various Watlow F4T with different configu
 - Temp with single state refrig
 - Temp and Humi with cascade refrig
 
-Tested on Debian 11 platform via the TCP/IP protocol.
+Tested on Debian 9 with custom install of Python 3.7.3; CentOS 7 on Python 3.6.8 Debian 10/11 (on default Python 3 install) platform via the TCP/IP protocol.
 Tested with Python:
 
 - Python 3.6.8
