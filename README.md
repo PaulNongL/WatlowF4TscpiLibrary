@@ -10,7 +10,7 @@ This library makes use of the built-in Python Library. It requires importing ate
 
 Thus, only following are needed: 
  
- - Python 3
+ - Python 3.7.3+
  - Python3-pip
 
 The SCPI protocol for Watlow F4T is application with new firmware (tested on 04:07:0012). It also only applies in TCP/IP protocol application, using port 5025. IT does not support serial itnerface.  
