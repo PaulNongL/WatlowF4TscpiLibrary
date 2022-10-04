@@ -134,7 +134,7 @@ class F4T(Controller):
         '''send terminating signal
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
+        time.sleep(0.5)
         rsp = self.read_items()
         status = None
         status = True if rsp == 'ON' else False
@@ -144,7 +144,7 @@ class F4T(Controller):
         '''read the state of time signal output
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
+        time.sleep(0.5)
         rsp = self.read_items()
         print (f'Time Signal#{ts_num} : {rsp}')
         pass
@@ -154,42 +154,50 @@ class F4T(Controller):
            in opposite state of its current condition
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
+        time.sleep(0.5)
         rsp = self.read_items()
         state = "ON" if rsp == 'OFF' else "OFF"
-        time.sleep(0.2)
+        time.sleep(0.5)
         self.send_cmd(f':OUTPUT{ts_num}:STATE {state}')
-
-    def set_ramScale(self, ramp_scale, loop = 1):
-        '''define ramp scale for loop 1
-        '''
-        scale = RampScale(ramp_scale)
-        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {scale}')
 
     def ramp_mode(self, mode, loop):
         '''set ramp mode: 
            define option for each mode:
-              mode: OFF (turn off ramping); set instant change to SP.
+              mode: OFF (turn off ramping, start instant change)
               mode: STARTUP (set startup)
               mode: SETPOINT (apply setpoint change)
               mode: BOTH (apply both values silmultaneously)
         '''
         self.send_cmd(f':SOURCE:CLOOP{loop}:RACTION {mode}')
 
-    def get_ramp(self, rampType, loop = 1):
+    def get_ramp(self, rampType, loop):
         '''get ramp mode in rate or time
            
            rate: RRATE
            time: RTIME
-        '''
-        rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
-        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode}')
 
-    def set_ramp(self, rampType, value, loop = 1):
+           loop : [1,4]; loop = 1 : Temp, loop = 2 : Humi, etc 
+        '''
+        rateMode = 'RRATE' if rampType == 'rate' else 'RTIME'
+        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode}?')
+        time.sleep(0.5)
+        rsp = self.read_items()
+        print (f'RAMP RATE : {rsp}') if rateMode == 'RRATE' else print (f'RAMP TIME : {rsp}') 
+
+    def set_ramp(self, rampType, value, loop):
         '''apply ramp setting in rate or time
 
            rate: RRATE
            time: RTIME 
         '''
-        rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
+        rateMode = 'RRATE' if rampType == 'rate' else 'RTIME'
         self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode} {value}')
+        print ('Done.')
+
+    def set_rampScale(self, ramp_scale, loop):
+        '''define ramp scale for loop
+        '''
+        scale = 'HOURS' if ramp_scale == 'H' else 'M'
+        #scale = RampScale(ramp_scale)
+        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {scale}')
+        print ('Done.')

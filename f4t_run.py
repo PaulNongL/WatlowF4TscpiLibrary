@@ -27,7 +27,8 @@ def ip_addr():
     '''
     while True:
         try:
-            ip_addr = input('Enter F4T IP address (e.g., 192.168.0.101): ')
+            #ip_addr = input('Enter F4T IP address (e.g., 192.168.0.101): ')
+            ip_addr = '10.30.100.183'
             chk_ip = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip_addr)
             if chk_ip:
                 print ('\n')
@@ -65,6 +66,7 @@ def listProg():
     print ("Profile list may be inaccurate if list is acquired while a profile is being executed.")
     print ("Please wait...")
     tst.get_profiles()
+    time.sleep(0.5)
     tst.get_units()
     print (f"\nF4T profiles found in sequence (slot number: 'name'): \n{tst.profiles}")
     print (f"\nTemperature Units currently used: \n   [Units]: {tst.temp_units}")
@@ -147,9 +149,60 @@ def instantChange(mode, loop):
     '''
     print ('Starting Instant Change on temperature...')
     time.sleep(0.5)
-    tst.ramp_mode('STARTUP',1)
-    time.sleep(1)
+    #tst.ramp_mode('STARTUP',1)
+    #time.sleep(0.5)
     tst.ramp_mode(mode,loop)
+
+def ramp2SP(mode,loop):
+    '''Start ramp to Temp to set point
+    '''
+    print ('Starting Ramping on temperature to SetPoint value...')
+    time.sleep(0.5)
+    tst.ramp_mode(mode,loop)
+
+def setScale(loop):
+    '''Set ramp scale in unit or hours or unit of minutes
+
+    Unit: HOURS; MINUTES
+    '''
+    try: 
+        scale = input('Enter ramp scale type in M or H: ')
+        if scale == 'H':
+            time.sleep(0.5) 
+            tst.set_rampScale(scale,loop)
+        elif scale == 'M':
+            time.sleep(0.5)
+            tst.set_rampScale(scale,loop)
+        else:
+            print ('Invalid scale type. Expecting M or H')
+    except ValueError:
+        print ('Invalid input.') 
+
+def setRV(loop):
+    '''Set new value for ramp rate
+    '''
+    try:
+        value = float(input('Enter rate value: '))
+        if isinstance(value, (int, float)):
+            tst.set_ramp('rate',value, loop)
+        else:
+            print ('Value must be a decimal number.') 
+    except ValueError:
+        print ('Invalid operation. Option terminated.')  
+
+def setRT(loop):
+    '''Set new value for ramp time
+
+    Time: house or minutes 
+    '''
+    try:
+        value = int(input('Enter time value in [MINUTES] unit: '))
+        if isinstance(value, int):
+            tst.set_ramp('time',value, loop)
+        else:
+            print ('Value must be integer (whole) number.') 
+    except ValueError:
+        print ('Invalid operation. Option terminated.')   
 
 def thCtrl():
     '''
@@ -166,8 +219,8 @@ def thCtrl():
             setTemp('Temp',1)
         elif option == 'h':
             setTemp('Humi',2)
-        elif option == 's':
-            instantChange('OFF',1)
+        elif option == 'l':
+            listTempPV(1)
         elif option == 'z':
             print('Returning to Main Menu.')
             time.sleep(.5)
@@ -193,6 +246,8 @@ def selection():
             progMenu()
         elif option == 'e':
             eventCtrl()
+        elif option == 'r':
+            rampMenu() 
         elif option == 'z':
             print('Program terminated.')
             exit()
@@ -221,6 +276,86 @@ def eventCtrl():
         else:
             print('Invalid option; expected a letter [a-z].')
 
+def rampMenu():
+    '''define ramp mode and control
+        'rr': 'Read ramp rate value 
+        'sr': 'Set ramp rate value
+        'rt': 'Read ramp time value 
+        'st': 'Set ramp time value  
+        'rs': 'Ramp to SetPoint     
+        'is': 'Instant change to SP
+        'sc': 'Set Ramp Scale in [HR or MIN]
+        'z' : 'Return to Main Menu 
+    '''
+    while(True):
+        print_menu('5')
+        option = ''
+        chk_range = range(1,4,1)
+        try:
+            option = input('Select option ("rr", "sr", ...): ')
+        except:
+            print('Invalid input.')
+        if option == 'rr':
+            try:
+                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                if isinstance(loop, int):
+                    if loop in chk_range:
+                        tst.get_ramp('rate',loop)
+                    else:
+                        print ('Loop out of range.') 
+            except ValueError:
+                print ('Invalid loop number.')  
+        elif option == 'sr':
+            try:
+                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                if isinstance(loop, int):
+                    if loop in chk_range:
+                        setRV(loop)
+                    else:
+                        print ('Loop out of range.') 
+            except ValueError:
+                print ('Invalid loop number.') 
+        elif option == 'rt':
+            try:
+                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                if isinstance(loop, int):
+                    if loop in chk_range:
+                        tst.get_ramp('time',loop)
+                    else:
+                        print ('Loop out of range.')  
+            except ValueError:
+                print ('Invalid loop number.')
+        elif option == 'st':
+            try:
+                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                if isinstance(loop, int):
+                    if loop in chk_range:
+                        setRT(loop)
+                    else:
+                        print ('Loop out of range.') 
+            except ValueError:
+                print ('Invalid loop number.')             
+        elif option == 'rs':
+            ramp2SP('SETPOINT',1)
+        elif option == 'ic':
+            instantChange('OFF',1)
+        elif option == 'sc':
+            try:
+                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                if isinstance(loop, int):
+                    if loop in chk_range:
+                        setScale(loop)
+                    else:
+                        print ('Loop out of range.') 
+            except ValueError:
+                print ('Invalid loop number.')
+        elif option == 'z':
+            print('Return to Main Menu...')
+            time.sleep(0.5)
+            os.system('clear||cls')
+            selection() 
+        else:
+            print('Invalid option.')
 
 def progMenu():  # test 
     '''set up selection menu for operation
@@ -261,39 +396,51 @@ def progMenu():  # test
 def menu(choice):
     '''menu
     '''
-    # option 1
+    # main menu 
     main_menu = {
-        't': 'Temp/Humi SP control       ',
-        'p': 'Program control            ',
-        'e': 'Event control              ',
-        'z': 'Exit                       '
+        't': 'Temp/Humi SP control          ',
+        'p': 'Program control               ',
+        'r': 'Ramp control                  ',
+        'e': 'Event control                 ',
+        'z': 'Exit                          '
     }
 
-    # option 2
+    # temp and humi ctrl menu
     th_menu = {
-        't': 'New Temperature Set Point  ',
-        'h': 'New Humidity Set Point     ',
-        's': 'Start instant change to SP ',
-        'z': 'Return to Main Menu        '
+        't': 'New Temperature Set Point     ',
+        'h': 'New Humidity Set Point        ',
+        'l': 'List current Temp PV/SP       ',
+        'z': 'Return to Main Menu           '
     }
 
-    # option 3
+    # program menu 
     prog_menu = {
-        'l': 'List program               ',
-        'e': 'Execute program            ',
-        'p': 'Pause program              ',
-        'r': 'Resume program             ',
-        's': 'Stop program               ',
-        'z': 'Return to Main Menu        '
+        'l': 'List program                  ',
+        'e': 'Execute program               ',
+        'p': 'Pause program                 ',
+        'r': 'Resume program                ',
+        's': 'Stop program                  ',
+        'z': 'Return to Main Menu           '
     }
 
-    # option 4
+    # event ctrl menu 
     ts_menu = {
-        'r': 'Read event (TS) output     ',
-        's': 'Set event (TS) output      ', 
-        'z': 'Return to Main Menu        '
+        'r': 'Read event (TS) output        ',
+        's': 'Set event (TS) output         ', 
+        'z': 'Return to Main Menu           '
     }
 
+    # ramp ctrl menu 
+    ramp_menu = {
+        'rr': 'Read ramp rate value         ',
+        'sr': 'Set ramp rate value          ', 
+        'rt': 'Read ramp time value         ',
+        'st': 'Set ramp time value          ',
+        'rs': 'Ramp to SetPoint             ',
+        'ic': 'Instant change to SP         ',
+        'sc': 'Set Ramp Scale in H or M     ', 
+        'z ': 'Return to Main Menu          '
+    }
 
     if choice == '1':
         return main_menu
@@ -303,15 +450,17 @@ def menu(choice):
         return prog_menu 
     elif choice == '4':
         return ts_menu 
+    elif choice == '5':
+        return ramp_menu 
 
 def print_menu(choice):
     '''set up selection menu
     '''
     print ('\nF4T control options:'
-           '\n--------------------------') 
+           '\n------------------------------') 
     for key in menu(choice).keys():
         print (f'  [{key}]:', menu(choice)[key] )
-    print ('--------------------------') 
+    print ('------------------------------') 
 
 if __name__ == "__main__":
 
