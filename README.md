@@ -56,7 +56,7 @@ Tested with Python:
 - Python 3.7.3
 - Python 3.9.1
 
-Thus, this implementation will work on all Python 3+  
+Thus, this implementation will work on all Python 3.6+  
 
 ## Implementation 
 
