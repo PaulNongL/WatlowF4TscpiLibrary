@@ -17,7 +17,7 @@ sys.path.insert(0,'./f4t')
 import time
 import logging
 
-from f4t.f4t_class import Controller, TempUnits, RampScale
+from f4t.f4t_class import Controller, TempUnits
 from f4t.f4t_interface import F4T
 
 LOG = logging.getLogger(__name__)
@@ -65,11 +65,9 @@ def listProg():
     print ('\nReading profiles from F4T. Profile gap in the list is ignored.')
     print ("Profile list may be inaccurate if list is acquired while a profile is being executed.")
     print ("Please wait...")
-    tst.get_profiles()
     time.sleep(0.5)
-    tst.get_units()
+    tst.get_profiles()
     print (f"\nF4T profiles found in sequence (slot number: 'name'): \n{tst.profiles}")
-    print (f"\nTemperature Units currently used: \n   [Units]: {tst.temp_units}")
     pass 
 
 def listTempPV(loop):
@@ -144,6 +142,16 @@ def setTS():
     except ValueError:
         print ('Invalid TS number.')
 
+def tsName():
+    '''get Time Signal name
+    '''
+    try:
+        ts_num = int(input('Enter TS number: '))
+        if isinstance(ts_num, int):
+            tst.get_tsName(ts_num)
+    except ValueError:
+        print ('Invalid TS number.')
+
 def instantChange(mode, loop):
     '''Start the instant temperature change to set point
     '''
@@ -166,15 +174,15 @@ def setScale(loop):
     Unit: HOURS; MINUTES
     '''
     try: 
-        scale = input('Enter ramp scale type in "MINUTES" or "HOURS": ')
-        if scale == 'HOURS':
+        scale = input('Enter ramp scale type in M or H: ')
+        if scale == 'H':
             time.sleep(0.5) 
-            tst.set_rampScale(scale,loop)
-        elif scale == 'MINUTES':
+            tst.set_rampScale('HOURS',loop)
+        elif scale == 'M':
             time.sleep(0.5)
-            tst.set_rampScale(scale,loop)
+            tst.set_rampScale('MINUTES',loop)
         else:
-            print ('Invalid scale type. Expecting "MINUTES" or "HOURS" word.')
+            print ('Invalid scale type. Expecting letter "M" or "H".')
     except ValueError:
         print ('Invalid input.') 
 
@@ -229,6 +237,19 @@ def thCtrl():
         else:
             print('Invalid option; expected a letter [a-z].')
 
+def unit():
+    '''read device unit
+    '''
+    time.sleep(0.5)
+    print (f'Temperature unit: {tst.get_units()}')
+
+def deviceID():
+    '''read device id information
+    '''
+    print ('Probing target device...')
+    time.sleep(0.5)
+    print (f'Device information: {tst.get_id()}')
+
 def selection(): 
     '''
        Set options for program control
@@ -237,17 +258,21 @@ def selection():
         print_menu('1')
         option = ''
         try:
-            option = input('Select option (a-z): ')
+            option = input('Select option (i, t, p, ...): ')
         except:
             print('Invalid input; expected a letter [a-z].')
-        if option == 't':
+        if option == 'i':
+            deviceID()
+        elif option == 't':
             thCtrl()
         elif option == 'p':
             progMenu()
         elif option == 'e':
             eventCtrl()
         elif option == 'r':
-            rampMenu() 
+            rampMenu()
+        elif option == 'u':
+            unit() 
         elif option == 'z':
             print('Program terminated.')
             exit()
@@ -268,6 +293,8 @@ def eventCtrl():
             readTS()
         elif option == 's':
             setTS()
+        elif option == 'n':
+            tsName()
         elif option == 'z':
             print('Return to Main Menu...')
             time.sleep(0.5)
@@ -398,10 +425,12 @@ def menu(choice):
     '''
     # main menu 
     main_menu = {
+        'i': 'Device information            ',
         't': 'Temp/Humi SP control          ',
         'p': 'Program control               ',
         'r': 'Ramp control                  ',
         'e': 'Event control                 ',
+        'u': 'Temperature Unit              ',
         'z': 'Exit                          '
     }
 
@@ -427,6 +456,7 @@ def menu(choice):
     ts_menu = {
         'r': 'Read event (TS) output        ',
         's': 'Set event (TS) output         ', 
+        'n': 'Read event (TS) name          ',
         'z': 'Return to Main Menu           '
     }
 

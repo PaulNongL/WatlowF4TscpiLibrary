@@ -10,7 +10,7 @@ This library makes use of the built-in Python Library. It requires importing ate
 
 Thus, only following are needed: 
  
- - Python 3.7.3+
+ - Python 3.6+
  - Python3-pip
 
 The SCPI protocol for Watlow F4T is application with new firmware (tested on 04:07:0012). It also only applies in TCP/IP protocol application, using port 5025. IT does not support serial itnerface.  
@@ -34,7 +34,8 @@ Commands should be issued as sudo (or under root shell):
 ### CentOS 7 GNU/Linux
 
 CentOS 7 basic install has Python 2.7. Thus, Python 3 must be install manually.
-To accomplish this, CentOS 7 must be modified to link to the CentOS repository and RMPFusion. 
+To accomplish this, CentOS 7 must be modified to link to the CentOS repository and RMPFusion.
+Python 3.6.8 is the default package for this distribution.  
 
 - yum update
 - yum install python3 python3-pip

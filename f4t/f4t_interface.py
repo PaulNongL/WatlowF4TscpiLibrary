@@ -9,28 +9,46 @@ for communication via SCPI register, unregister using built-in Python Library.
 '''
 import time
 import logging
-from f4t_class import Controller, TempUnits, RampScale
+from f4t_class import Controller, TempUnits
 
 LOG = logging.getLogger(__name__)
 
 class F4T(Controller):
-    def __init__(self, set_point:float = 22.0, 
-                 units:TempUnits = TempUnits.C, profile:int = 1, *args, **kwargs):
+#    def __init__(self, set_point:float = 22.0, 
+#                 units:TempUnits = TempUnits.C, profile:int = 1, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        self.set_point = set_point
+#        self.temp_units = units
+#        self.current_profile = profile
+#        if self.timeout is None:
+#            self.timeout = 1.5
+#        self.profiles = {}
+
+    def __init__(self,  profile:int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.set_point = set_point
-        self.temp_units = units
         self.current_profile = profile
         if self.timeout is None:
             self.timeout = 1.5
         self.profiles = {}
 
+    def get_id(self):
+        '''reading device id and info
+        '''
+        self.clear_buffer()
+        time.sleep(0.5) 
+        self.send_cmd('*IDN?')
+        self.f4t_id = self.read_items()
+        return self.f4t_id 
+
     def get_units(self):
         '''probe controller for current set units
         '''
         self.clear_buffer()
+        time.sleep(0.5)
         self.send_cmd(':UNIT:TEMPERATURE?')
         rsp = self.read_items()
-        self.temp_units = TempUnits(rsp)        
+        self.temp_units = TempUnits(rsp)   
+        return self.temp_units
 
     def set_units(self, units:TempUnits = None):
         '''apply new units to controller
@@ -82,6 +100,7 @@ class F4T(Controller):
            TempPV: loop = 1
            HumiPV: loop = 2
         '''
+        self.clear_buffer() 
         self.send_cmd(f':SOURCE:CLOOP{loop}:PVALUE?')
         return self.read_items()
 
@@ -130,16 +149,6 @@ class F4T(Controller):
         '''
         self.send_cmd(f'SOURCE:CLOOP{loop}:SPOINT {val}')
 
-    def is_done(self, ts_num):
-        '''send terminating signal
-        '''
-        self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.5)
-        rsp = self.read_items()
-        status = None
-        status = True if rsp == 'ON' else False
-        return status
-
     def get_ts(self, ts_num):
         '''read the state of time signal output
         '''
@@ -159,6 +168,15 @@ class F4T(Controller):
         state = "ON" if rsp == 'OFF' else "OFF"
         time.sleep(0.5)
         self.send_cmd(f':OUTPUT{ts_num}:STATE {state}')
+
+    def get_tsName(self, ts_num):
+        '''read the name of assigned time signal
+        '''
+        self.send_cmd(f':OUTPUT{ts_num}:NAME?') 
+        time.sleep(0.5)
+        rsp = self.read_items()
+        print (f'Name of Time Signal {ts_num} : {rsp}')
+        pass
 
     def ramp_mode(self, mode, loop):
         '''set ramp mode: 
@@ -197,6 +215,5 @@ class F4T(Controller):
     def set_rampScale(self, ramp_scale, loop):
         '''set ramp scaling for loop
         '''
-        #scale = RampScale(ramp_scale)
         self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {ramp_scale}')
         print ('Done.')
