@@ -195,9 +195,8 @@ class F4T(Controller):
         print ('Done.')
 
     def set_rampScale(self, ramp_scale, loop):
-        '''define ramp scale for loop
+        '''set ramp scaling for loop
         '''
-        scale = 'HOURS' if ramp_scale == 'H' else 'M'
         #scale = RampScale(ramp_scale)
-        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {scale}')
+        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {ramp_scale}')
         print ('Done.')

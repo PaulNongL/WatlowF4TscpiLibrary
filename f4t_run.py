@@ -166,15 +166,15 @@ def setScale(loop):
     Unit: HOURS; MINUTES
     '''
     try: 
-        scale = input('Enter ramp scale type in M or H: ')
-        if scale == 'H':
+        scale = input('Enter ramp scale type in "MINUTES" or "HOURS": ')
+        if scale == 'HOURS':
             time.sleep(0.5) 
             tst.set_rampScale(scale,loop)
-        elif scale == 'M':
+        elif scale == 'MINUTES':
             time.sleep(0.5)
             tst.set_rampScale(scale,loop)
         else:
-            print ('Invalid scale type. Expecting M or H')
+            print ('Invalid scale type. Expecting "MINUTES" or "HOURS" word.')
     except ValueError:
         print ('Invalid input.') 
 
