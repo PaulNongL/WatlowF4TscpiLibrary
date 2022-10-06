@@ -1,5 +1,5 @@
 '''
-:author: Paul Nong-Laolam <paul.nong-laolam@espec.com>
+:author: Paul Nong-Laolam <pnong-laolam@espec.com>
 :license: MIT, see LICENSE for more detail.
 :copyright: (c) 2022. ESPEC North America, INC.
 :file: f4t_class.py
@@ -83,7 +83,7 @@ class TempUnits(Enum):
     C = 'C'
     F = 'F'
 
-class Scale(Enum):
+class RampScale(Enum):
     '''
     Ramp Scale Type
     '''

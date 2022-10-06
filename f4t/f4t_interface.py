@@ -1,5 +1,5 @@
 '''
-:author: Paul Nong-Laolam <paul.nong-laolam@espec.com>
+:author: Paul Nong-Laolam <pnong-laolam@espec.com>
 :license: MIT, see LICENSE for more detail.
 :copyright: (c) 2022. ESPEC North America, INC.
 :file: f4t_interface.py
@@ -9,7 +9,7 @@ for communication via SCPI register, unregister using built-in Python Library.
 '''
 import time
 import logging
-from f4t_class import Controller, TempUnits
+from f4t.f4t_class import Controller, TempUnits, RampScale
 
 LOG = logging.getLogger(__name__)
 
@@ -50,12 +50,18 @@ class F4T(Controller):
         self.temp_units = TempUnits(rsp)   
         return self.temp_units
 
-    def set_units(self, units:TempUnits = None):
+    def set_units(self):
         '''apply new units to controller
+
+        C will always the chosen unit. 
         '''
-        if units is None:
-            units = self.temp_units
-        self.send_cmd(f':UNITS:TEMPERATURE {units.value}')
+        units = self.get_units()
+        if isinstance(units,TempUnits) == True:
+            print (f'Current unit is: {units} \nRecommend using this unit.')
+            pass 
+        else: 
+            self.send_cmd(f':UNITS:TEMPERATURE{TempUnits.C.name}')
+            print (f'Unit is now set in: {TempUnits.C}')
 
     def get_profiles(self):
         '''set max limit for profile list

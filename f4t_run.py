@@ -1,6 +1,6 @@
 #!/bin/python3
 '''
-:author: Paul Nong-Laolam <paul.nong-laolam@espec.com>
+:author: Paul Nong-Laolam <pnong-laolam@espec.com>
 :license: MIT, see LICENSE for more detail.
 :copyright: (c) 2022. ESPEC North America, INC.
 :file: f4t_run.py 
@@ -17,7 +17,7 @@ sys.path.insert(0,'./f4t')
 import time
 import logging
 
-from f4t.f4t_class import Controller, TempUnits
+from f4t.f4t_class import Controller, TempUnits, RampScale
 from f4t.f4t_interface import F4T
 
 LOG = logging.getLogger(__name__)
@@ -233,24 +233,43 @@ def thCtrl():
             print('Returning to Main Menu.')
             time.sleep(.5)
             os.system('clear||cls')
-            selection()
+            main_menu()
         else:
             print('Invalid option; expected a letter [a-z].')
 
 def unit():
     '''read device unit
     '''
-    time.sleep(0.5)
-    print (f'Temperature unit: {tst.get_units()}')
+    while(True):
+        print_menu('6')
+        option = ''
+        try:
+            option = input('Select option (r, s, z): ')
+        except:
+            print('Invalid input; expected a letter [r,s,z].')
+        if option == 'r':
+            print ('Probing device for Temp unit...')
+            time.sleep(0.5)
+            print (f'Temperature unit: {tst.get_units()}')
+        elif option == 's':
+            time.sleep(0.5)
+            tst.set_units()
+        elif option == 'z':
+            print('Returning to Main Menu.')
+            time.sleep(.5)
+            os.system('clear||cls')
+            main_menu()
+        else:
+            print('Invalid option; expected a letter [r,s,z].')
 
 def deviceID():
     '''read device id information
     '''
     print ('Probing target device...')
     time.sleep(0.5)
-    print (f'Device information: {tst.get_id()}')
+    print (f'Manufacturer, Part Number, S/N, Software Version:\n{tst.get_id()}')
 
-def selection(): 
+def main_menu(): 
     '''
        Set options for program control
     '''
@@ -299,7 +318,7 @@ def eventCtrl():
             print('Return to Main Menu...')
             time.sleep(0.5)
             os.system('clear||cls')
-            selection() 
+            main_menu() 
         else:
             print('Invalid option; expected a letter [a-z].')
 
@@ -380,7 +399,7 @@ def rampMenu():
             print('Return to Main Menu...')
             time.sleep(0.5)
             os.system('clear||cls')
-            selection() 
+            main_menu() 
         else:
             print('Invalid option.')
 
@@ -416,12 +435,20 @@ def progMenu():  # test
             print('Return to Main.')
             time.sleep(0.5)
             os.system('clear||cls')
-            selection()
+            main_menu()
         else:
             print('Invalid option; expected a letter [a-z].')
 
 def menu(choice):
-    '''menu
+    '''menu list
+
+    option: 
+       1: main menu
+       2: Temp/Humi menu
+       3: Program menu
+       4: Output (Time Signal) menu
+       5: Ramp menu
+       6: Unit menu
     '''
     # main menu 
     main_menu = {
@@ -472,6 +499,13 @@ def menu(choice):
         'z ': 'Return to Main Menu          '
     }
 
+    # unit menu 
+    unit_menu = {
+        'r': 'Read Temp unit                ',
+        's': 'Set new Temp unit             ', 
+        'z': 'Return to Main Menu           '
+    }
+
     if choice == '1':
         return main_menu
     elif choice == '2':
@@ -482,6 +516,8 @@ def menu(choice):
         return ts_menu 
     elif choice == '5':
         return ramp_menu 
+    elif choice == '6':
+        return unit_menu
 
 def print_menu(choice):
     '''set up selection menu
@@ -507,6 +543,7 @@ if __name__ == "__main__":
     print (f'\nTemperature Status: \n  PV: {currentPV} \n  SP: {currentSP}')
 
     # initiate menu
-    selection()
+    #main_menu()
+    main_menu()
 
     # sys.exit('Terminated')
