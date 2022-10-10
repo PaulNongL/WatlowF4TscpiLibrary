@@ -1,5 +1,5 @@
 '''
-:author: Paul Nong-Laolam <paul.nong-laolam@espec.com>
+:author: Paul Nong-Laolam <pnong-laolam@espec.com>
 :license: MIT, see LICENSE for more detail.
 :copyright: (c) 2022. ESPEC North America, INC.
 :file: f4t_interface.py
@@ -9,35 +9,59 @@ for communication via SCPI register, unregister using built-in Python Library.
 '''
 import time
 import logging
-from f4t_class import Controller, TempUnits, RampScale
+from f4tscpi.f4t_class import Controller, TempUnits, RampScale
 
 LOG = logging.getLogger(__name__)
 
 class F4T(Controller):
-    def __init__(self, set_point:float = 22.0, 
-                 units:TempUnits = TempUnits.C, profile:int = 1, *args, **kwargs):
+#    def __init__(self, set_point:float = 22.0, 
+#                 units:TempUnits = TempUnits.C, profile:int = 1, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        self.set_point = set_point
+#        self.temp_units = units
+#        self.current_profile = profile
+#        if self.timeout is None:
+#            self.timeout = 1.5
+#        self.profiles = {}
+
+    def __init__(self,  profile:int = 1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.set_point = set_point
-        self.temp_units = units
         self.current_profile = profile
         if self.timeout is None:
             self.timeout = 1.5
         self.profiles = {}
 
+    def get_id(self):
+        '''reading device id and info
+        '''
+        self.clear_buffer()
+        time.sleep(0.5) 
+        self.send_cmd('*IDN?')
+        self.f4t_id = self.read_items()
+        return self.f4t_id 
+
     def get_units(self):
         '''probe controller for current set units
         '''
         self.clear_buffer()
+        time.sleep(0.5)
         self.send_cmd(':UNIT:TEMPERATURE?')
         rsp = self.read_items()
-        self.temp_units = TempUnits(rsp)        
+        self.temp_units = TempUnits(rsp)   
+        return self.temp_units
 
-    def set_units(self, units:TempUnits = None):
+    def set_units(self):
         '''apply new units to controller
+
+        C will always the chosen unit. 
         '''
-        if units is None:
-            units = self.temp_units
-        self.send_cmd(f':UNITS:TEMPERATURE {units.value}')
+        units = self.get_units()
+        if isinstance(units,TempUnits) == True:
+            print (f'Current unit is: {units} \nRecommend using this unit.')
+            pass 
+        else: 
+            self.send_cmd(f':UNITS:TEMPERATURE{TempUnits.C.name}')
+            print (f'Unit is now set in: {TempUnits.C}')
 
     def get_profiles(self):
         '''set max limit for profile list
@@ -82,6 +106,7 @@ class F4T(Controller):
            TempPV: loop = 1
            HumiPV: loop = 2
         '''
+        self.clear_buffer() 
         self.send_cmd(f':SOURCE:CLOOP{loop}:PVALUE?')
         return self.read_items()
 
@@ -130,21 +155,11 @@ class F4T(Controller):
         '''
         self.send_cmd(f'SOURCE:CLOOP{loop}:SPOINT {val}')
 
-    def is_done(self, ts_num):
-        '''send terminating signal
-        '''
-        self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
-        rsp = self.read_items()
-        status = None
-        status = True if rsp == 'ON' else False
-        return status
-
     def get_ts(self, ts_num):
         '''read the state of time signal output
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
+        time.sleep(0.5)
         rsp = self.read_items()
         print (f'Time Signal#{ts_num} : {rsp}')
         pass
@@ -154,42 +169,57 @@ class F4T(Controller):
            in opposite state of its current condition
         '''
         self.send_cmd(f':OUTPUT{ts_num}:STATE?') 
-        time.sleep(0.2)
+        time.sleep(0.5)
         rsp = self.read_items()
         state = "ON" if rsp == 'OFF' else "OFF"
-        time.sleep(0.2)
+        time.sleep(0.5)
         self.send_cmd(f':OUTPUT{ts_num}:STATE {state}')
 
-    def set_ramScale(self, ramp_scale, loop = 1):
-        '''define ramp scale for loop 1
+    def get_tsName(self, ts_num):
+        '''read the name of assigned time signal
         '''
-        scale = RampScale(ramp_scale)
-        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {scale}')
+        self.send_cmd(f':OUTPUT{ts_num}:NAME?') 
+        time.sleep(0.5)
+        rsp = self.read_items()
+        print (f'Name of Time Signal {ts_num} : {rsp}')
+        pass
 
     def ramp_mode(self, mode, loop):
         '''set ramp mode: 
            define option for each mode:
-              mode: OFF (turn off ramping); set instant change to SP.
+              mode: OFF (turn off ramping, start instant change)
               mode: STARTUP (set startup)
               mode: SETPOINT (apply setpoint change)
               mode: BOTH (apply both values silmultaneously)
         '''
         self.send_cmd(f':SOURCE:CLOOP{loop}:RACTION {mode}')
 
-    def get_ramp(self, rampType, loop = 1):
+    def get_ramp(self, rampType, loop):
         '''get ramp mode in rate or time
            
            rate: RRATE
            time: RTIME
-        '''
-        rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
-        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode}')
 
-    def set_ramp(self, rampType, value, loop = 1):
+           loop : [1,4]; loop = 1 : Temp, loop = 2 : Humi, etc 
+        '''
+        rateMode = 'RRATE' if rampType == 'rate' else 'RTIME'
+        self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode}?')
+        time.sleep(0.5)
+        rsp = self.read_items()
+        print (f'RAMP RATE : {rsp}') if rateMode == 'RRATE' else print (f'RAMP TIME : {rsp}') 
+
+    def set_ramp(self, rampType, value, loop):
         '''apply ramp setting in rate or time
 
            rate: RRATE
            time: RTIME 
         '''
-        rateMode = 'RRATE?' if rampType == 'rate' else 'RTIME?'
+        rateMode = 'RRATE' if rampType == 'rate' else 'RTIME'
         self.send_cmd(f':SOURCE:CLOOP{loop}:{rateMode} {value}')
+        print ('Done.')
+
+    def set_rampScale(self, ramp_scale, loop):
+        '''set ramp scaling for loop
+        '''
+        self.send_cmd(f':SOURCE:CLOOP{loop}:RSCALE {ramp_scale}')
+        print ('Done.')
