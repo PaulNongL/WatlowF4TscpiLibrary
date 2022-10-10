@@ -73,6 +73,15 @@ class Controller:
         unregister(self._conn.close)
         self._conn.close()
 
+    def close(self):
+        '''
+        Close the physical interface
+        '''
+        try:
+            self._conn.close()
+        except Exception:
+            pass
+
 class TempUnits(Enum):
     '''
     specify unit representation for standard temperature reading
