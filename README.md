@@ -41,6 +41,21 @@ Python 3.6.8 is the default package for this distribution.
 - yum install python3 python3-pip
 - pip3 install --upgrade pip
 
+### Installing F4TSCPI library
+
+Run the follow script to install the package: 
+
+```pip install f4tscpi```
+
+## Test the Program
+
+After executing ``pip install ,package.``, change directory to: ./bin to execute the program: 
+
+``sudo python3 f4t_run.py```
+
+The program must be executed by user with root or sudo privilege. 
+
+
 ## Testing
 
 This implementation has been tested on various Watlow F4T with different configurations according to their installed modules for: 
@@ -61,4 +76,4 @@ Thus, this implementation will work on all Python 3.6+
 
 ## Implementation 
 
-For required application not implemented in the sample run program 'f4t_run.py', various methods can be implemented to call the interface modules in action.  
+For required application not implemented in the sample run program may be added by referencing the SCPI commands in the spread fould in the folder: f4t+scpi_cmds 
