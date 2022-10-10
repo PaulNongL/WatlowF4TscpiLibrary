@@ -49,7 +49,7 @@ Run the follow script to install the package:
 
 ## Test the Program
 
-After executing ``pip install ,package.``, change directory to: ./bin to execute the program: 
+After executing ``pip install <package>``, change directory to: ./bin to execute the program: 
 
 ``sudo python3 f4t_run.py```
 
