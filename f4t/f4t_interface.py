@@ -9,7 +9,7 @@ for communication via SCPI register, unregister using built-in Python Library.
 '''
 import time
 import logging
-from f4t.f4t_class import Controller, TempUnits, RampScale
+from f4tscpi.f4t_class import Controller, TempUnits, RampScale
 
 LOG = logging.getLogger(__name__)
 
