@@ -1,5 +1,5 @@
 '''
-:author: Paul Nong-Laolam <paul.nong-laolam@espec.com>
+:author: Paul Nong-Laolam <pnong-laolam@espec.com>
 :license: MIT, see LICENSE for more detail.
 :copyright: (c) 2022. ESPEC North America, INC.
 :file: f4t_class.py
@@ -69,17 +69,18 @@ class Controller:
         '''
         self._conn.send(cmd.encode(self.encoding) + self.EOL)
 
-    def get_id(self):
-        '''reading device id and info
-        '''
-        self.clear_buffer()
-        self.send_cmd('*IDN?')
-        self.f4t_id = self.read_items()
-        return self.f4t_id 
-
     def __del__(self):
         unregister(self._conn.close)
         self._conn.close()
+
+    def close(self):
+        '''
+        Close the physical interface
+        '''
+        try:
+            self._conn.close()
+        except Exception:
+            pass
 
 class TempUnits(Enum):
     '''
@@ -93,9 +94,7 @@ class TempUnits(Enum):
 
 class RampScale(Enum):
     '''
-    Set ramp commands to controller via enumeration class representation
-    define: minute and hour
-            minute = minute, hour = hour 
+    Ramp Scale Type
     '''
-    MINUTES = 'MINUTES'
-    HOURS = 'HOURS'
+    H = 'HOURS'
+    M = 'MINUTES'
