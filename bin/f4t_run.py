@@ -216,26 +216,21 @@ def thCtrl():
     '''
        set options for Temp and Humi controls
     '''
+    def thOption(option):
+        '''get T/H option
+        '''
+        return {
+            't': lambda: setTemp('Temp',1),
+            'h': lambda: setTemp('Humi',2),
+            'l': lambda: listTempPV(1),
+            'z': lambda: main_menu(),
+        }.get(option, lambda: print ('Not a valid option; expecting [t, h, l, z]') )()
+
     while(True):
         print_menu('2')
         option = ''
-        try:
-            option = input('Select option (a-z): ')
-        except:
-            print('Invalid input; expected a letter [a-z].')
-        if option == 't':
-            setTemp('Temp',1)
-        elif option == 'h':
-            setTemp('Humi',2)
-        elif option == 'l':
-            listTempPV(1)
-        elif option == 'z':
-            print('Returning to Main Menu.')
-            time.sleep(.5)
-            os.system('clear||cls')
-            main_menu()
-        else:
-            print('Invalid option; expected a letter [a-z].')
+        option = input('Select option (a-z): ')
+        thOption(option) 
 
 def unit():
     '''read device unit
@@ -268,59 +263,47 @@ def deviceID():
     print ('Probing target device...')
     time.sleep(0.5)
     print (f'Manufacturer, Part Number, S/N, Software Version:\n{tst.get_id()}')
+    pass
 
 def main_menu(): 
     '''
        Set options for program control
     '''
+    def getOption(option):
+        return {
+            'i': lambda: deviceID(),
+            't': lambda: thCtrl(),
+            'p': lambda: progMenu(),
+            'e': lambda: eventCtrl(),
+            'r': lambda: rampMenu(),
+            'u': lambda: unit(),
+            'z': lambda: exit(),
+        }.get(option, lambda: print ('Not a valid option; expecting [i, t, p, ...]') )() 
+
     while(True):
         print_menu('1')
         option = ''
-        try:
-            option = input('Select option (i, t, p, ...): ')
-        except:
-            print('Invalid input; expected a letter [a-z].')
-        if option == 'i':
-            deviceID()
-        elif option == 't':
-            thCtrl()
-        elif option == 'p':
-            progMenu()
-        elif option == 'e':
-            eventCtrl()
-        elif option == 'r':
-            rampMenu()
-        elif option == 'u':
-            unit() 
-        elif option == 'z':
-            print('Program terminated.')
-            exit()
-        else:
-            print('Invalid option; expected a letter [a-z].')
+        option = input('Select option (i, t, p, ...): ')
+        getOption(option)
 
 def eventCtrl():
     '''Test TS events
     '''
+    def eventOption(option):
+        '''get event option menu
+        '''
+        return {
+            'r': lambda: readTS(),
+            's': lambda: setTS(),
+            'n': lambda: tsName(),
+            'z': lambda: main_menu(), 
+        }.get(option, lambda: print('Not a valid option') )()
+
     while(True):
         print_menu('4')
         option = ''
-        try:
-            option = input('Select option (a-z): ')
-        except:
-            print('Invalid input; expected a letter [a-z].')
-        if option == 'r':
-            readTS()
-        elif option == 's':
-            setTS()
-        elif option == 'n':
-            tsName()
-        elif option == 'z':
-            print('Return to Main Menu...')
-            time.sleep(0.5)
-            os.system('clear||cls')
-            main_menu() 
-        else:
-            print('Invalid option; expected a letter [a-z].')
+        option = input('Select option (a-z): ')
+        eventOption(option)
 
 def rampMenu():
     '''define ramp mode and control
@@ -349,7 +332,6 @@ def rampMenu():
 
         if option == 'rr':
             try:
-                #loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
                 loop = loop()
                 if isinstance(loop, int):
                     if loop in chk_range:
@@ -361,7 +343,6 @@ def rampMenu():
         elif option == 'sr':
             try:
                 loop = loop()
-                #loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
                 if isinstance(loop, int):
                     if loop in chk_range:
                         setRV(loop)
@@ -372,7 +353,6 @@ def rampMenu():
         elif option == 'rt':
             try:
                 loop = loop()
-                #loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
                 if isinstance(loop, int):
                     if loop in chk_range:
                         tst.get_ramp('time',loop)
@@ -383,7 +363,6 @@ def rampMenu():
         elif option == 'st':
             try:
                 loop = loop()
-                #loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
                 if isinstance(loop, int):
                     if loop in chk_range:
                         setRT(loop)
@@ -397,7 +376,7 @@ def rampMenu():
             instantChange('OFF',1)
         elif option == 'sc':
             try:
-                loop = int(input('Enter loop number (1=Temp, 2=Humi; loop_max=4): '))
+                loop = loop()
                 if isinstance(loop, int):
                     if loop in chk_range:
                         setScale(loop)
@@ -424,30 +403,23 @@ def progMenu():  # test
        s: stop program
        z: return to Main Menu 
     '''
+    def prgOption(option):
+        '''get program option from menu
+        '''
+        return {
+            'l': lambda: listProg(),
+            'e': lambda: runProg(),
+            'p': lambda: progMode('PAUSE'),
+            'r': lambda: progMode('RESUME'),
+            's': lambda: progMode('STOP'),
+            'z': lambda: main_menu(),
+        }.get(option, lambda: print('Not a valid option') )()
+
     while(True):
         print_menu('3')
         option = ''
-        try:
-            option = input('Select option (a-z): ')
-        except:
-            print('Invalid input; expected a letter [a-z].')
-        if option == 'l':
-            listProg()
-        elif option == 'e':
-            runProg()
-        elif option == 'p':
-            progMode('PAUSE')
-        elif option == 'r':
-            progMode('RESUME')
-        elif option == 's':
-            progMode('STOP')
-        elif option == 'z':
-            print('Return to Main.')
-            time.sleep(0.5)
-            os.system('clear||cls')
-            main_menu()
-        else:
-            print('Invalid option; expected a letter [a-z].')
+        option = input('Select option (a-z): ')
+        prgOption(option)
 
 def menu(choice):
     '''menu list
@@ -515,21 +487,6 @@ def menu(choice):
         's': 'Set new Temp unit             ', 
         'z': 'Return to Main Menu           '
     }
-
-    """
-    if choice == '1':
-        return main_menu
-    elif choice == '2':
-        return th_menu
-    elif choice == '3':
-        return prog_menu 
-    elif choice == '4':
-        return ts_menu 
-    elif choice == '5':
-        return ramp_menu 
-    elif choice == '6':
-        return unit_menu
-    """
 
     return {
         '1': lambda: main_menu,
