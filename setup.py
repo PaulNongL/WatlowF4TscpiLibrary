@@ -13,7 +13,7 @@ setup(
     description='A library for interfacing with Watlow F4T using SCPI method',
     long_description=readme(),
     url='https://github.com/PaulNongL/WatlowF4TscpiLibrary/tree/f4tscpi',
-    author='Espec North America',
+    author='Paul Nong-Laolam<Espec North America>',
     author_email='pnong-laolam@espec.com',
     license='MIT',
     packages=['f4tscpi'],
@@ -22,7 +22,7 @@ setup(
     include_package_data=True,
     scripts=['bin/f4t_run.py'],
 
-    classicifiers=[
+    classifiers=[
         'Programming Language :: Python :: 3.6.8',
         'Programming Language :: Python :: 3.7.3',
         'Programming Language :: Python :: 3.9.3',
