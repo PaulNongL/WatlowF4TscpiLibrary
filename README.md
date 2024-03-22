@@ -29,7 +29,7 @@ Commands should be issued as sudo (or under root shell):
 
 - apt update
 - apt install python3-pip
-- pip3 install --upgrade pip
+- python3 -m pip install --upgrade pip
 
 ### CentOS 7 GNU/Linux
 
@@ -38,7 +38,7 @@ To accomplish this, CentOS 7 must be modified to link to the CentOS repository a
 
 - yum update
 - yum install python3 python3-pip
-- pip3 install --upgrade pip
+- python3 -m pip install --upgrade pip
 
 ## Testing
 
